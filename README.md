@@ -248,6 +248,19 @@ If context wraps beyond the available decision area, `ask_user` collapses it int
 
 With [pi-tern](https://github.com/edlsh/pi-tern) in a [Tern](https://stencil.so) pane, the prompt takes the composer's place, laid out like omp's ask dialog: question tabs for a batch, the question and context as markdown, the options as a clickable list, a native editor for custom responses and comments, a review page and an action bar. Keys still go to `ask_user` as in any terminal. The tool card shows each question over all of its options, with a check on the chosen ones. Both hooks use pi-tern's global symbols, so nothing changes when pi-tern isn't installed.
 
+### Program status
+
+Custom prompts pass `blocked: { kind: "question", message: "Waiting for user response" }`
+to Pi so terminals and dashboards that support OSC 7501 can show that input is
+needed. This covers single-question and batch prompts in overlay and inline
+mode. The message does not include question, context, option, or answer content.
+
+Pi owns status cleanup when a prompt completes, is cancelled, times out, or
+fails. On Pi versions with blocking overlay support (1.5.2 or newer), hiding an
+unanswered overlay keeps the session blocked until the interaction ends.
+Older hosts ignore unsupported options; native status reporting is not
+guaranteed there. The existing `herdr:blocked` events remain available.
+
 ### Events
 
 While an interactive prompt is open, the extension emits `herdr:blocked` with `{ active: true, label: "Waiting for user response" }`. It emits `{ active: false }` in `finally`, including cancellation and error paths. Hosts without a listener are unaffected.

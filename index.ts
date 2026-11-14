@@ -520,12 +520,21 @@ function matchesSelectDown(data: string, keybindings: KeybindingsManager): boole
 function buildCustomUIOptions(
    displayMode: AskDisplayMode,
    onHandle?: (handle: OverlayHandle) => void,
-): { overlay?: boolean; overlayOptions?: OverlayOptions; onHandle?: (handle: OverlayHandle) => void } | undefined {
+): {
+   blocked: { kind: "question"; message: string };
+   overlay?: boolean;
+   overlayOptions?: OverlayOptions;
+   onHandle?: (handle: OverlayHandle) => void;
+} {
+   // Pi owns the native program-status lifecycle; older hosts ignore this option.
+   // Keep the message generic so terminal status never exposes question content.
+   const blocked = { kind: "question" as const, message: "Waiting for user response" };
    switch (displayMode) {
       case "inline":
-         return undefined;
+         return { blocked };
       case "overlay":
          return {
+            blocked,
             overlay: true,
             overlayOptions: {
                anchor: "center" as const,
@@ -540,6 +549,7 @@ function buildCustomUIOptions(
          const _exhaustive: never = displayMode;
          void _exhaustive;
          return {
+            blocked,
             overlay: true,
             overlayOptions: {
                anchor: "center" as const,
